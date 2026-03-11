@@ -21,6 +21,10 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'birthdate', // Add this line to allow mass assignment of birthdate
+        'address', // Add this line to allow mass assignment of address
+        'phone_number', // Add this line to allow mass assignment of phone_number
+        'image', // Add this line to allow mass assignment of image
     ];
 
     /**
@@ -43,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birthdate' => 'date', // Add this line to cast birthdate as a date
         ];
     }
 }
