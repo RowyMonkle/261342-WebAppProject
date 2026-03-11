@@ -50,4 +50,7 @@ class User extends Authenticatable
             'birthdate' => 'date', // Add this line to cast birthdate as a date
         ];
     }
+
+ 
+    
 }

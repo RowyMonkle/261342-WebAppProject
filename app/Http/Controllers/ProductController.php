@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Product;
 
 class ProductController extends Controller
 {
@@ -11,7 +12,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $products =Product::all();
+        return view('products.index', compact('products'));
     }
 
     /**
@@ -19,7 +21,7 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //
+        //return view('products.create');
     }
 
     /**
@@ -35,7 +37,8 @@ class ProductController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $product = Product::where('product_id', $id)->firstOrFail(); 
+    return view('products.show', compact('product'));
     }
 
     /**

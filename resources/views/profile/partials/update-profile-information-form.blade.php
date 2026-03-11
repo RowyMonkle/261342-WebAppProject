@@ -65,14 +65,9 @@
             <x-input-error class="mt-2" :messages="$errors->get('birthdate')" />        
         </div>
         
-         <div>
-            <x-input-label for="profile_photo" :value="__('Profile Image')" />
-            <x-text-input id="profile_photo" name="profile_photo" type="file" class="mt-1 block w-full" accept="image/*" />     
-            <x-input-error class="mt-2" :messages="$errors->get('profile_photo')" />
-        </div>
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
-
+        
             @if (session('status') === 'profile-updated')
                 <p
                     x-data="{ show: true }"
@@ -84,15 +79,5 @@
             @endif
         </div>
     </form>
-    
-@if ($user->image)
-    <div>
-        <x-input-label :value="__('Current Profile Photo')" />
-        <div class="mt-2">
-            <img src="{{ route('user.photo', $user->image) }}" 
-                 alt="Profile Photo"
-                 class="w-32 h-32 object-cover rounded-full">
-        </div>
-    </div>
-@endif
+
 </section>

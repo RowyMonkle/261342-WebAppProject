@@ -18,8 +18,8 @@ class UserController extends Controller
 
         $user = Auth::user(); //user alow to update own photo
 
-        // Delete old photo if exists
-        if ($user->image) {
+        // Delete old photo    if exists
+        if ($user->image  && File::exists(storage_path('app/private/profile_photos/' . $user->image))) {
             File::delete(storage_path('app/private/profile_photos/' . $user->image));
         }
 
