@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Response;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/', [ProductController::class, 'index'])->name('products.index');
+Route::get('/', [ProductController::class, 'index'])->name('home');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{id}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/product-photo/{filename}', [ProductController::class, 'showPhoto'])->name('product.photo');
