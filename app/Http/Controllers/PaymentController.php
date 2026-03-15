@@ -163,15 +163,33 @@ class PaymentController extends Controller
      */
     public function markFailed(string $id)
     {
+        //order and item prepare for restock
         $payment = Payment::where('payment_id', $id)
-                         ->where('user_id', Auth::id())
-                         ->firstOrFail();
+        ->whereHas('order', function ($query) {
+            $query->where('user_id', Auth::id());
+        })
+        ->with('order.items.product')
+        ->firstOrFail();
+        
+        // 1. update payment
+    $payment->update([
+        'status' => 'failed'
+    ]);
 
-        $payment->markAsFailed();
+    // 2. update order
+    $order = $payment->order;
+    $order->update([
+        'status' => 'cancelled', 
+        'payment_status' => 'failed'
+    ]);
 
-        // Mark order as failed when payment fails and restore product stock
-        $payment->order->markAsFailed();
-        $payment->order->restoreProductStock();
+    // 3. Restore Stock by column stock_number
+    foreach ($order->items as $item) {
+        if ($item->product) {
+            // use increment for re-stock
+            $item->product->increment('stock_number', $item->quantity);
+        }
+    }
 
         return redirect()->route('payments.index')->with('warning', 'Payment marked as failed.');
     }

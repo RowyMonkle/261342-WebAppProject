@@ -82,7 +82,8 @@
                                 @if(str_starts_with($product->image, 'http'))
                                     <img src="{{ $product->image }}" class="w-16 h-16 object-cover rounded-lg">
                                 @else
-                                    <img src="{{ asset('storage/products/' . $product->image) }}" class="w-16 h-16 object-cover rounded-lg">
+                                    <img src="{{ route('product.photo', ['filename' => basename($item->product->image)]) }}" 
+     class="w-20 h-20 object-cover rounded-lg shadow-sm border border-gray-100">
                                 @endif
                                 <div class="flex-1">
                                     <p class="font-medium">{{ $product->name }}</p>

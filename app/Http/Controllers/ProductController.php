@@ -4,17 +4,42 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Tag;
 use Illuminate\Support\Facades\Storage; // import storage facade for handling file uploads
+use App\Models\Wishlist;
+use Illuminate\Support\Facades\Auth; 
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products =Product::with('tags')->get();
-        return view('products.index', compact('products'));
+        $search = $request->input('search');
+        $category = $request->input('category');
+
+        $query = Product::query();
+
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+        }
+
+        if ($category) {
+            $query->whereHas('tags', function ($q) use ($category) {
+                $q->where('name', $category);
+            });
+        }
+
+        $products = $query->with('tags')->get();
+        
+        // Get all categories (tags) used in products
+        $categories = Tag::whereHas('products', function ($q) {
+            $q->where('taggable_type', 'App\\Models\\Product');
+        })->pluck('name')->unique();
+
+        return view('products.index', compact('products', 'search', 'category', 'categories'));
     }
 
     /**
@@ -22,7 +47,9 @@ class ProductController extends Controller
      */
     public function create()
     {
-        return view('products.create');
+        //pull all tags from database
+        $tags = Tag::all();
+        return view('products.create',compact('tags'));
     }
 
     /**
@@ -58,9 +85,11 @@ class ProductController extends Controller
        $product = Product::with('tags')
                 ->where('product_id', $id)
                 ->firstOrFail();
-    return view('products.show', compact('product'));
+        //check if the product is in the user's wishlist
+        $inWishlist = Auth::check()? $product->wishlists()->where('user_id', Auth::id())->exists() : false;
+    return view('products.show', compact('product', 'inWishlist'));
     }
-
+    
     /**
      * Show the form for editing the specified resource.
      */
@@ -97,7 +126,7 @@ class ProductController extends Controller
 
         $product->update($validatedData);
 
-        return redirect()->route('products.index')->with('success', 'Product updated successfully.');
+        return redirect()->route('admin.products')->with('success', 'Product updated successfully.');
     }
 
     /**

@@ -258,18 +258,27 @@ public function confirm(Request $request)
 
 public function cancel(string $id)
 {
-    $order = Auth::user()->orders()->findOrFail($id);
-
-    if ($order->status !== 'pending') {
-        return redirect()->back()
-                       ->with('error', 'Only pending orders can be cancelled.');
+    $order = Auth::user()->orders()->with('items.product')->findOrFail($id);
+    //allow to cancel befor shipping
+    if (!in_array(strtolower($order->status), ['pending', 'processing', 'packing'])) {
+        return redirect()->back()->with('error', 'Cannot cancel order in this stage.');
     }
-
-    $order->markAsCancelled();
-    //update payment status to cancelled if order is cancelled
-    $order->payments()->where('status', 'unpaid')->update(['status' => 'cancelled']);
-    //update order's payment status to cancelled as well
-     Order::where('order_id', $order->order_id)->update(['payment_status' => 'cancelled']);
+    if (strtolower($order->payment_status) === 'paid') {
+        $order->payment_status = 'refunded'; // แก้ตรงนี้ให้เป็น refunded
+        $order->payments()->where('status', 'paid')->update(['status' => 'refunded']);
+    } else {
+        $order->payment_status = 'cancelled';
+    }
+    //restock
+    foreach ($order->items as $item) {
+        if ($item->product) {
+            $item->product->increment('stock_number', $item->quantity);
+        }
+    }
+    
+    //update
+    $order->status = 'cancelled';
+    $order->save();
     return redirect()->route('orders.index')
                      ->with('success', 'Order cancelled successfully.');
 }
