@@ -67,10 +67,11 @@ class ProductController extends Controller
         ]);
 
         // Handle image upload
-        if ($request->hasFile('image')) {
-            $imagePath = Cloudinary::upload($request->file('image')->getRealPath())->getSecurePath();
-            $validatedData['image'] = $imagePath;
-        }
+       if ($request->hasFile('image')) {
+    $cloudinary = new CloudinaryClient(env('CLOUDINARY_URL'));
+    $result = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
+    $validatedData['image'] = $result['secure_url'];
+}
 
         Product::create($validatedData);
 
