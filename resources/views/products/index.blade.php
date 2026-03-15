@@ -34,6 +34,23 @@
 
     <main class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <!-- Search Bar -->
+            <div class="mb-6">
+                <form action="{{ route('products.index') }}" method="GET" class="flex gap-2">
+                    <input type="text" name="search" placeholder="Search products by name or description..."
+                           value="{{ $search ?? '' }}"
+                           class="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                        Search
+                    </button>
+                    @if ($search ?? false)
+                        <a href="{{ route('products.index') }}" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition">
+                            Clear
+                        </a>
+                    @endif
+                </form>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 @forelse ($products as $product)
                     <div class="bg-white dark:bg-gray-800 shadow rounded-2xl overflow-hidden hover:shadow-xl transition duration-300">
@@ -84,9 +101,7 @@
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full text-center py-20 bg-white rounded-3xl shadow">
-                        <p class="text-gray-500 text-lg">ขณะนี้ยังไม่มีสินค้าวางจำหน่าย</p>
-                    </div>
+                    <p class="text-gray-500">{{ $search ? 'No products found matching your search.' : 'No products available' }}</p>
                 @endforelse
             </div>
         </div>

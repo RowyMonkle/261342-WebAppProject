@@ -6,19 +6,25 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\Storage; // import storage facade for handling file uploads
 use App\Models\Wishlist;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Tag;
+use Illuminate\Support\Facades\Auth; 
 
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //change to this so people didn't reg can see
-        $products = Product::with('tags')->where('stock_number', '>', 0)->get();
-        return view('products.index', compact('products'));
+        $search = $request->input('search'); // adding 'search' for product name
+
+        $query = Product::query();
+
+        if ($search) { //add search functionality condition
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+
+        $products = $query->with('tags')->get();
+        return view('products.index', compact('products', 'search'));
     }
 
     /**
