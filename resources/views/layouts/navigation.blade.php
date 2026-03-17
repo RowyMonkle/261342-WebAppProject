@@ -23,15 +23,18 @@
                 </div>
 
                 <!-- Navigation Links -->
+        
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
             <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-nav-link>
-            @if(Auth::user()->role === 'admin')
-            <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
-                     Admin
-            </x-nav-link>
-            @endif
+            @auth
+    @if(auth()->user()->role === 'admin')
+        <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.index')">
+            Admin
+        </x-nav-link>
+    @endif
+@endauth
             <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.index')">
                 {{ __('Products') }}
             </x-nav-link>
@@ -61,7 +64,9 @@
                         "
                         hover="this.style.background='rgba(255,255,255,0.24)'"
                     >
-                            <div>{{ Auth::user()->name }}</div>
+                            @auth
+    <div>{{ auth()->user()->name }}</div>
+@endauth
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
@@ -113,11 +118,16 @@
         </div>
 
         <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-            </div>
+       @auth
+    <div class="px-4">
+        <div class="font-medium text-base text-gray-800 dark:text-gray-200">
+            {{ auth()->user()->name }}
+        </div>
+        <div class="font-medium text-sm text-gray-500">
+            {{ auth()->user()->email }}
+        </div>
+    </div>
+@endauth
 
             <div class="navbar">
                 <x-responsive-nav-link :href="route('profile.edit')">
