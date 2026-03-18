@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl leading-tight" style="color: var(--text);">
+        <h2 class="font-semibold text-xl leading-tight" style="color: var(--secondary);">
             {{ __('My Wish List') }}
         </h2>
     </x-slot>

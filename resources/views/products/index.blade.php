@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl leading-tight" style="color: var(--text);">
+        <h2 class="font-semibold text-xl leading-tight" style="color: var(--secondary);">
             Products
         </h2>
     </x-slot>

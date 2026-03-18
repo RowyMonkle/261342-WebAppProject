@@ -1,3 +1,16 @@
 @props(['disabled' => false])
 
-<input @disabled($disabled) {{ $attributes->merge(['class' => 'border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm']) }}>
+<input
+    @disabled($disabled)
+    {{ $attributes->merge([
+        'class' => 'w-full p-3 text-sm focus:outline-none',
+        'style' => '
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(0,0,0,0.12);
+            background: var(--surface);
+            color: var(--text);
+        '
+    ]) }}
+    onfocus="this.style.boxShadow='0 0 0 3px rgba(236,161,182,0.30)'; this.style.borderColor='var(--secondary)';"
+    onblur="this.style.boxShadow='none'; this.style.borderColor='rgba(0,0,0,0.12)';"
+/>
