@@ -4,16 +4,43 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
-
+use App\Models\Tag;
+use Illuminate\Support\Facades\Storage; // import storage facade for handling file uploads
+use App\Models\Wishlist;
+use Illuminate\Support\Facades\Auth; 
+use Cloudinary\Cloudinary as CloudinaryClient;
+use Cloudinary\Configuration\Configuration;
 class ProductController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products =Product::with('tags')->get();
-        return view('products.index', compact('products'));
+        $search = $request->input('search');
+        $category = $request->input('category');
+
+        $query = Product::query();
+
+        if ($search) {
+            $query->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+        }
+
+        if ($category) {
+            $query->whereHas('tags', function ($q) use ($category) {
+                $q->where('name', $category);
+            });
+        }
+
+        $products = $query->with('tags')->get();
+        
+        // Get all categories (tags) used in products
+        $categories = Tag::whereHas('products', function ($q) {
+            $q->where('taggable_type', 'App\\Models\\Product');
+        })->pluck('name')->unique();
+
+        return view('products.index', compact('products', 'search', 'category', 'categories'));
     }
 
     /**
@@ -21,7 +48,9 @@ class ProductController extends Controller
      */
     public function create()
     {
-        //return view('products.create');
+        //pull all tags from database
+        $tags = Tag::all();
+        return view('products.create',compact('tags'));
     }
 
     /**
@@ -29,7 +58,24 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'stock_number' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Handle image upload
+       if ($request->hasFile('image')) {
+    $cloudinary = new CloudinaryClient(env('CLOUDINARY_URL'));
+    $result = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
+    $validatedData['image'] = $result['secure_url'];
+}
+
+        Product::create($validatedData);
+
+        return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
     /**
@@ -41,23 +87,45 @@ class ProductController extends Controller
        $product = Product::with('tags')
                 ->where('product_id', $id)
                 ->firstOrFail();
-    return view('products.show', compact('product'));
+        //check if the product is in the user's wishlist
+        $inWishlist = Auth::check()? $product->wishlists()->where('user_id', Auth::id())->exists() : false;
+    return view('products.show', compact('product', 'inWishlist'));
     }
-
+    
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(string $id) //adding edit product method
     {
-        //
+        $product = Product::where('product_id', $id)->firstOrFail();
+        return view('products.edit', compact('product'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, string $id) //adding update product method
     {
-        //
+        $product = Product::where('product_id', $id)->firstOrFail();
+
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'stock_number' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Handle image upload
+       if ($request->hasFile('image')) {
+    $cloudinary = new CloudinaryClient(env('CLOUDINARY_URL'));
+    $result = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath());
+    $validatedData['image'] = $result['secure_url'];
+}
+
+        $product->update($validatedData);
+
+        return redirect()->route('admin.products')->with('success', 'Product updated successfully.');
     }
 
     /**
@@ -65,6 +133,15 @@ class ProductController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $product = Product::where('product_id', $id)->firstOrFail();
+
+        // Delete image if exists
+        if ($product->image && Storage::disk('public')->exists($product->image)) {
+            Storage::disk('public')->delete($product->image);
+        }
+
+        $product->delete();
+
+        return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
     }
 }

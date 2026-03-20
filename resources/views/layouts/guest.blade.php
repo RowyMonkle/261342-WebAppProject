@@ -14,16 +14,25 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
+    <body class="font-sans antialiased">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0"
+        style="background: var(--bg); color: var(--text);">
             <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                <!-- รอโลโก้ -->
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-3">
+                    <img
+                        src="{{ asset('images/logo.JPG') }}"
+                        alt="Stellar Logo"
+                        class="h-20 w-auto" 
+                    /> 
                 </a>
             </div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
+            <div class="animated-border shadow">
+                <div class="w-full sm:max-w-2xl mt-6 px-6 py-4 overflow-hidden sm:rounded-lg">
+                <!-- <div class="w-full max-w-md sm:max-w-lg lg:max-w-xl mx-auto"> -->
+                    {{ $slot }}
+                </div>
             </div>
         </div>
     </body>

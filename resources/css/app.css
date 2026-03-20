@@ -1,3 +1,290 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Pink Theme */
+    --pinkPage-primary: #ECA1B6;
+    --pinkPage-secondary: #D67B91;
+    --pinkPage-accent: #F9C0D9;
+    --pinkPage-neutral-Brown: #7B4A3A;
+    --pinkPage-neutral-1: #FFF8FA;
+    --pinkPage-neutral-2: #FCEDEE;
+    --pinkPage-favorite-star: #BD8083;
+
+    /* Brown Theme */
+    --brownPage-primary: #7B4A3A;
+    --brownPage-secondary: #A0522D;
+    --brownPage-accent-pink: #ECA1B6;
+    --brownPage-favorite-star: #eb7eb1;
+
+    /* Semantic & Shared */
+    --stellar-white: #FFFFFF;
+    --bg-light: #F5F5F5;
+    --bg-dark: #333333;
+    --color-success: #4CAF50;
+    --color-error: #d4183d;
+    
+    /* Spacing & Radius */
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.5rem;
+
+    /* ===== Theme tokens (Use across the whole web) ===== */
+    --primary: var(--pinkPage-primary);
+    --secondary: var(--pinkPage-secondary);
+    --accent: var(--pinkPage-accent);
+    --neutral: var(--pinkPage-neutral-Brown);
+
+    --bg: var(--pinkPage-neutral-1);   /* #FFF8FA */
+    --surface: var(--stellar-white);
+    --text: #333333;
+
+    --favorite-star: var(--pinkPage-favorite-star);
+  }
+
+  /* class="theme-brown" at body or html */ 
+  .theme-brown {
+    --primary: var(--brownPage-primary);
+    --secondary: var(--brownPage-secondary);
+    --accent: var(--brownPage-accent-pink);
+    --neutral: var(--brownPage-primary);
+    --favorite-star: var(--brownPage-favorite-star);
+  }
+
+  body {
+    @apply antialiased;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Noto Sans Thai', sans-serif;
+  }
+}
+
+@layer components {
+  .page-wrap { @apply py-10; }
+  .container { @apply max-w-4xl mx-auto sm:px-6 lg:px-8; }
+
+  .card {
+    @apply shadow;
+    background: var(--surface);
+    border-radius: var(--radius-2xl);
+  }
+
+  .card-pad { @apply p-4 sm:p-5 lg:p-6 xl:p-7; }
+
+  .divider { @apply border-t; border-color: rgba(0,0,0,0.08); }
+
+  .h1 { @apply text-xl font-semibold; color: var(--text); }
+  .h2 { @apply text-lg font-semibold; color: var(--text); }
+
+  .muted { @apply text-sm text-gray-500; } 
+
+  .btn { @apply inline-flex items-center justify-center px-4 py-2 text-sm font-semibold transition; border-radius: var(--radius-xl); }
+  .btn-primary { @apply btn text-white; background: var(--primary); }
+  .btn-primary:hover { background: var(--secondary); }
+
+  .btn-success { @apply btn text-white; background: var(--color-success); }
+  .btn-success:hover { filter: brightness(0.95); }
+
+  .btn-danger { @apply btn text-white; background: var(--color-error); }
+  .btn-danger:hover { filter: brightness(0.95); }
+
+  .badge { @apply px-3 py-1 rounded-full text-xs font-semibold; }
+
+  .input, .select {
+    @apply w-full border p-3 text-sm focus:outline-none;
+    border-radius: var(--radius-lg);
+    border-color: rgba(0,0,0,0.12);
+    background: var(--surface);
+  }
+  .input:focus, .select:focus {
+    box-shadow: 0 0 0 3px rgba(236,161,182,0.35); /* อิง pink primary */
+    border-color: var(--primary);
+  }
+
+  /* NAV BAR */
+  .navbar {
+    background: var(--pinkPage-primary);
+    color: #fff;
+  }
+  .navbar a { color: #fff; }
+  
+  .navbar-container { @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8; }
+  .navbar-top { @apply h-16 flex items-center justify-between; }
+  .navbar-bottom { @apply h-12 flex items-center gap-8; }
+  
+  .nav-link { @apply text-sm font-semibold opacity-90 hover:opacity-100 transition; }
+  .nav-link-active { @apply text-sm font-semibold; border-bottom: 3px solid rgba(255,255,255,0.95); padding-bottom: 0.55rem; }
+  
+  .icon-btn { @apply w-10 h-10 inline-flex items-center justify-center rounded-full transition; background: rgba(255,255,255,0.18); }
+  .icon-btn:hover { background: rgba(255,255,255,0.28); }
+
+  /* DROPDOWN */
+  .dropdown-danger {
+    color: var(--color-error) !important;
+    font-weight: 700;
+  }
+  .dropdown-danger:hover {
+    background: rgba(212, 24, 61, 0.10) !important; /* error tint */
+  }
+  .dropdown-danger:focus-visible {
+    box-shadow: 0 0 0 3px rgba(212, 24, 61, 0.25);
+  }
+
+  /* ANIMATION */
+  .animated-border {
+    position: relative;
+    border-radius: var(--radius-2xl);
+    overflow: hidden;
+  }
+
+  /* The moving colors behind */
+  .animated-border::before {
+    content: "";
+    position: absolute;
+    inset: -2px;                /* thickness control */
+    background: conic-gradient(
+      from 0deg,
+      var(--primary),
+      var(--accent),
+      var(--secondary),
+      var(--primary)
+    );
+    animation: spinBorder 8s linear infinite;
+    filter: blur(6px);
+  }
+
+  /* The inner panel (actual box background) */
+  .animated-border::after {
+    content: "";
+    position: absolute;
+    inset: 2px;                 /* border thickness */
+    background: var(--surface);
+    border-radius: calc(var(--radius-2xl) - 2px);
+    z-index: 0;
+  }
+
+  /* Make your content stay above the pseudo elements */
+  .animated-border > .animated-border-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Button Animated */
+  .file-btn-animated{
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 9999px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    isolation: isolate;
+    transition: transform .15s ease, filter .15s ease;
+  }
+
+  /* moving border */
+  .file-btn-animated::before{
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    background: conic-gradient(
+      from 0deg,
+      var(--primary),
+      var(--accent),
+      var(--secondary),
+      var(--primary)
+    );
+    animation: spinBorder 4s linear infinite;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* inner surface */
+  .file-btn-animated::after{
+    content: "";
+    position: absolute;
+    inset: 2px;
+    border-radius: inherit;
+    background: var(--surface);
+    z-index: 1;
+    pointer-events: none;
+    transition: background .2s ease;
+  }
+
+  /* text on top */
+  .file-btn-animated span{
+    position: relative;
+    z-index: 2;
+    color: var(--text);
+    transition: color .2s ease;
+  }
+
+  /* hover state */
+  .file-btn-animated:hover{
+    transform: translateY(-1px);
+    filter: brightness(1.02);
+  }
+
+  /* change inside color on hover */
+  .file-btn-animated:hover::after{
+    background: var(--pinkPage-neutral-2);
+  }
+
+  .file-btn-animated:hover span{
+    color: var(--secondary);
+  }
+
+  .file-btn-animated-clip{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px 16px;
+    border-radius: 9999px;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+
+    /* make the animated border stays inside */
+    border: 2px solid transparent;
+    background:
+      linear-gradient(var(--surface), var(--surface)) padding-box,
+      conic-gradient(from 0deg,
+        var(--primary),
+        var(--accent),
+        var(--secondary),
+        var(--primary)
+      ) border-box;
+
+    animation: spinHue 4s linear infinite;
+    color: var(--text);
+    transition: transform .15s ease, filter .15s ease, background .2s ease, color .2s ease;
+  }
+
+  .file-btn-animated-clip:hover{
+    transform: translateY(-1px);
+    color: var(--secondary);
+    filter: brightness(1.02);
+    background:
+      linear-gradient(var(--pinkPage-neutral-2), var(--pinkPage-neutral-2)) padding-box,
+      conic-gradient(from 0deg,
+        var(--primary),
+        var(--accent),
+        var(--secondary),
+        var(--primary)
+      ) border-box;
+  }
+
+  @keyframes spinHue{
+    to { filter: hue-rotate(360deg); }
+  }
+
+  @keyframes spinBorder {
+    to { transform: rotate(360deg); }
+  }
+}

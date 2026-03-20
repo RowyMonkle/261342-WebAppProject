@@ -1,6 +1,6 @@
 <section class="space-y-6">
     <header>
-        <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+        <h2 class="text-lg font-medium" style="color: var(--secondary)";>
             {{ __('Delete Account') }}
         </h2>
 
@@ -46,7 +46,13 @@
                     {{ __('Cancel') }}
                 </x-secondary-button>
 
-                <x-danger-button class="ms-3">
+                <x-danger-button
+                    class="ms-3"
+                    style="
+                        background: var(--color-error);
+                        border-radius: var(--radius-xl);
+                    "
+                >
                     {{ __('Delete Account') }}
                 </x-danger-button>
             </div>

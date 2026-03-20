@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Models\Product;
 
 class OrderController extends Controller
@@ -28,7 +29,8 @@ class OrderController extends Controller
      */
     public function create()
     {
-        //
+        $products = Product::all();
+        return view('orders.create', compact('products'));
     }
 
     /**
@@ -40,64 +42,273 @@ class OrderController extends Controller
         'products' => 'required|array|min:1',
         'products.*.product_id' => 'required|exists:products,product_id',
         'products.*.quantity'  => 'required|integer|min:1',
+        //collect data for order details from user input, such as name, address, phone number, payment method, etc. (for order confirmation page)
+        'name'             => 'required|string',
+        'address'          => 'required|string',
+        'phone'            => 'required|string|max:10',
+        'payment_method'   => 'required|in:promptpay,credit_card,bank_transfer,cash_on_delivery',
         ]);
+
         // Fetch products and calculate total price
-    $productIds = collect($validated['products'])->pluck('product_id');
-    $products   = Product::findMany($productIds)->keyBy('product_id');
-     $total = collect($validated['products'])->sum(
-        fn($item) => $products[$item['product_id']]->price * $item['quantity']
-    );
-    // Create order and attach products
-    $order = Auth::user()->orders()->create([
-        'status'      => 'pending',
-        'total_amount' => $total,
-        'order_date'   => now(),
-    ]);
-    $orderItems = collect($validated['products'])->map(
-            fn($item) => [
-                'product_id'        => $item['product_id'],
-                'quantity'          => $item['quantity'],
-                'price_at_purchase' => $products[$item['product_id']]->price,
-            ]
+        $productIds = collect($validated['products'])->pluck('product_id');
+        $products   = Product::findMany($productIds)->keyBy('product_id');
+        $total = collect($validated['products'])->sum(
+            fn($item) => $products[$item['product_id']]->price * $item['quantity']
+        );
+        $shippingFee = 50; //fixed price
+        $grandTotal  = $total + $shippingFee;
+
+        // Create order and attach products
+        $order = Auth::user()->orders()->create([
+            'status'       => 'pending',
+            'total_amount' => $grandTotal,
+            'shipping_fee' => $shippingFee,
+            'order_date'   => now(),
+            'address'      => $validated['address'],
+        ]);
+
+        $orderItems = collect($validated['products'])->map(
+                fn($item) => [
+                    'product_id'        => $item['product_id'],
+                    'quantity'          => $item['quantity'],
+                    'price_at_purchase' => $products[$item['product_id']]->price,
+                ]
         )->toArray();
 
         $order->items()->createMany($orderItems);
-// Clear user's cart after order creation
+        $order->payments()->create([
+            'status'       => 'unpaid',
+            'method'       => $validated['payment_method'],
+            'amount'       => $grandTotal,
+            'payment_date' => now(), // Payment date will be set when payment is completed
+        ]);
+
+        // Clear user's cart after order creation
         Auth::user()->cart()->first()?->items()->delete();
-    return redirect()->route('orders.show', $order->order_id)
-                     ->with('success', 'Order created successfully');
+        
+        return redirect()->route('payments.create', $order->order_id)
+                 ->with('success', 'Order created successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        $order =Auth::user()->orders()->with('items.product')->findOrFail($id);
+        $order = Auth::user()
+            ->orders()
+            ->with('items.product')
+            ->findOrFail($id);
+
         return view('orders.show', compact('order'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+// For "Buy Now" functionality, we can create a separate method that creates an order directly from a single product without going through the cart.
+public function edit(string $id)
+{
+    $order = Auth::user()
+        ->orders()
+        ->with('items.product')
+        ->findOrFail($id);
 
+    $products = Product::all();
+
+    return view('orders.edit', compact('order', 'products'));
+}
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $id)
-    {
-        //
+{
+    $order = Auth::user()->orders()->findOrFail($id);
+    
+    $validated = $request->validate([
+        'products' => 'required|array|min:1',
+        'products.*.product_id' => 'required|exists:products,product_id',
+        'products.*.quantity'  => 'required|integer|min:1',
+    ]);
+
+    return DB::transaction(function () use ($validated, $order) {
+        $productIds = collect($validated['products'])->pluck('product_id');
+        $products = Product::findMany($productIds)->keyBy('product_id');
+
+        $syncData = collect($validated['products'])->mapWithKeys(fn($item) => [
+            $item['product_id'] => [
+                'quantity' => $item['quantity'],
+                'price_at_purchase' => $products[$item['product_id']]->price,
+            ]
+        ])->toArray();
+
+        $order->products()->sync($syncData);
+
+        // update total amount
+        $total = collect($validated['products'])->sum(
+            fn($item) => $products[$item['product_id']]->price * $item['quantity']
+        );
+        
+        $shippingFee = 50;
+        $grandTotal  = $total + $shippingFee;
+        
+        $order->update([
+            'total_amount' => $grandTotal,
+            'shipping_fee' => $shippingFee,
+        ]);
+
+        // Prevent updates to paid orders
+        if ($order->isPaid()) {
+        return redirect()->back()
+                       ->with('error', 'Cannot update order that has already been paid.');
     }
 
+        return redirect()->route('orders.show', $order->order_id)
+                         ->with('success', 'Order updated successfully');
+    });
+}
+// For "Buy Now" functionality, we can create a separate method that creates an order directly from a single product without going through the cart.
+public function storeNow(Request $request)
+{
+    $validated = $request->validate([
+        'product_id' => 'required|exists:products,product_id',
+        'quantity'   => 'required|integer|min:1',
+    ]);
+
+    
+    return redirect()->route('orders.confirm', [ 'product_id' => $request->product_id,
+        'quantity'   => $request->quantity,]);
+}
+//need confirm order page before store order, to show order summary and confirm before place order
+public function confirm(Request $request) 
+{
+    if ($request->has('product_id')) {
+        $product = Product::findOrFail($request->product_id);
+        $quantity = $request->quantity ?? 1;
+
+        return view('orders.confirm', [
+            'items'      => collect([['product' => $product, 'quantity' => $quantity, 'product_id' => $product->product_id]]),
+            'is_buy_now' => true,
+            'product_id' => $product->product_id,
+            'quantity'   => $quantity,
+        ]);
+    }
+
+    $cart = Auth::user()->cart()->with('items.product')->first();
+
+    if (!$cart || $cart->items->isEmpty()) {
+        return redirect()->route('carts.index')->with('error', 'Cart is empty.');
+    }
+
+    return view('orders.confirm', compact('cart'));
+}
+
+    //status pending(default) -> processing -> packing -> delivering -> complete
+     /**
+     * Mark order as processing (payment initiated)
+     */
+    public function markAsProcessing(string $id)
+    {
+        $order = Order::where('order_id', $id)->firstOrFail();
+        if ($order->status !== 'pending') {
+            return redirect()->route('orders.index')
+                           ->with('warning', 'Only pending orders can be marked as processing.');
+        }
+        $order->markAsProcessing();
+        return redirect()->route('orders.show', $order->order_id)
+                         ->with('success', 'Order marked as processing successfully.');
+    }
+    /** 
+     * Mark order as packing
+     */
+    public function markAsDelivering(string $id) //according to the order flow (order status), only orders in packing status can be marked as delivering
+    {
+        $order = Order::where('order_id', $id)->firstOrFail();
+        if ($order->status !== 'packing') {
+            return redirect()->back()->with('error', 'Only orders in packing status can be marked as delivering.');
+        }
+        $order->markAsDelivering();
+        return redirect()->route('orders.show', $order->order_id)
+                         ->with('success', 'Order marked as delivering successfully.');
+    }
+     /**
+     * Update the specified resource in storage.
+     */
+    
+    /**
+     * Mark order as complete
+     */
+    public function markAsComplete(string $id)
+    {
+        $order = Order::where('order_id', $id)->firstOrFail();
+        
+        if ($order->status !== 'delivering') {
+            return redirect()->route('orders.index')
+                           ->with('warning', 'Order must be in delivering status to complete.');
+        }
+
+        $order->markAsComplete();
+        return redirect()->route('orders.index')->with('success', 'Order marked as complete.');
+    }
+    // Mark order as paid
+    public function markAsPaid(string $id)
+{
+    $order = Auth::user()->orders()->findOrFail($id);
+
+     // update old  payment record instead of creating new one.
+    $payment = $order->payments()->where('status', 'unpaid')->first();
+    
+    if ($payment) {
+        $payment->update([
+            'status'       => 'paid',
+            'method'       => 'manual',
+            'payment_date' => now(),
+        ]);
+    } else {
+        $order->payments()->create([
+            'status'       => 'paid',
+            'method'       => 'manual',
+            'amount'       => $order->total_amount,
+            'payment_date' => now(),
+        ]);
+    }
+
+    $order->markAsProcessing();
+
+    return redirect()->route('orders.show', $order->order_id)
+                     ->with('success', 'Payment confirmed!');
+}
+
+public function cancel(string $id)
+{
+    $order = Auth::user()->orders()->with('items.product')->findOrFail($id);
+    //allow to cancel befor shipping
+    if (!in_array(strtolower($order->status), ['pending', 'processing', 'packing'])) {
+        return redirect()->back()->with('error', 'Cannot cancel order in this stage.');
+    }
+    if (strtolower($order->payment_status) === 'paid') {
+        $order->payment_status = 'refunded'; // แก้ตรงนี้ให้เป็น refunded
+        $order->payments()->where('status', 'paid')->update(['status' => 'refunded']);
+    } else {
+        $order->payment_status = 'cancelled';
+    }
+    //restock
+    foreach ($order->items as $item) {
+        if ($item->product) {
+            $item->product->increment('stock_number', $item->quantity);
+        }
+    }
+    
+    //update
+    $order->status = 'cancelled';
+    $order->save();
+    return redirect()->route('orders.index')
+                     ->with('success', 'Order cancelled successfully.');
+}
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        //
+        $order = Order::where('order_id', $id)->firstOrFail();
+        $order->delete();
+
+        return redirect()->route('orders.index')->with('success', 'Order deleted successfully.');
     }
+
+
 }

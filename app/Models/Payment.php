@@ -13,6 +13,7 @@ class Payment extends Model
         'payment_method',
         'status',
         'payment_date',
+        'method',
         'user_id', // Add this line to allow mass assignment of user_id
     ];
 

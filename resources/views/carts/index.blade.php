@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h2 class="font-semibold text-xl leading-tight" style="color: var(--secondary);">
             {{ __('Cart') }}
         </h2>
     </x-slot>
@@ -88,20 +88,12 @@
                         </span>
                     </div>
 
-                    {{-- ✅ ปุ่ม Order Now --}}
-                    <div class="p-4 flex justify-end border-t border-gray-100">
-                        <form method="POST" action="{{ route('orders.store') }}">
-                            @csrf
-                            @foreach ($cart->items as $item)
-                                <input type="hidden" name="products[{{ $loop->index }}][product_id]" value="{{ $item->product_id }}">
-                                <input type="hidden" name="products[{{ $loop->index }}][quantity]" value="{{ $item->quantity }}">
-                            @endforeach
-                            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 font-medium">
-                                Order Now
-                            </button>
-                        </form>
-                    </div>
-
+                    {{-- ปุ่ม checkout --}}
+<div class="p-4 flex justify-end border-t">
+    <a href="{{ route('orders.confirm') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+        Order Now
+    </a>
+</div>
                 </div>
             @endif
 

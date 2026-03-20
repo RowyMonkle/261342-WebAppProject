@@ -1,6 +1,6 @@
 <section>
 <header>
-    <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
+    <h2 class="text-lg font-medium" style="color: var(--secondary)";>
         {{ __('Profile Photo') }}
     </h2>
 
@@ -12,18 +12,44 @@
 <form method="post" action="{{ route('profile.photo.update') }}" enctype="multipart/form-data" class="mt-6 space-y-6">
     @csrf
     @method('PATCH')
-    <div>
-        <x-input-label for="profile_photo" :value="__('Profile Photo')" />
-        <input type="file" name="profile_photo" id="profile_photo" class="mt-1 block w-full" />
-        <x-input-error class="mt-2" :messages="$errors->get('profile_photo')" />
+
+    <div class="mt-2" x-data="{ fileName: '' }">
+        <input
+            id="photo"
+            name="photo"
+            type="file"
+            class="hidden"
+            accept="image/*"
+            @change="fileName = $event.target.files?.[0]?.name ?? ''"
+        >
+
+        <div class="flex items-center gap-3 flex-wrap">
+            <label for="photo" class="file-btn-animated-clip">
+                Choose photo
+            </label>
+
+            <span class="text-sm" style="color: var(--neutral);"
+                  x-text="fileName || 'No file chosen'"></span>
+        </div>
     </div>
 
     <div class="flex items-center gap-4">
         <x-primary-button>{{ __('Save') }}</x-primary-button>
 
         @if (session('status') === 'profile-photo-updated')
-            <p x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 2000)"
-                class="text-sm text-gray-600 dark:text-gray-400">
+            <p
+                x-data="{ show: true }"
+                x-show="show"
+                x-transition
+                x-init="setTimeout(() => show = false, 2000)"
+                class="text-sm font-semibold px-3 py-1 inline-block"
+                style="
+                    color: var(--secondary);
+                    background: var(--pinkPage-neutral-2);
+                    border: 1px solid rgba(0,0,0,0.06);
+                    border-radius: 9999px;
+                "
+            >
                 {{ __('Saved.') }}
             </p>
         @endif

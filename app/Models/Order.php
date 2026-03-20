@@ -8,7 +8,10 @@ class Order extends Model
 {
     protected $primaryKey = 'order_id';
 
-    protected $fillable = ['user_id', 'status', 'total_amount', 'order_date'];
+    protected $fillable = [
+        'user_id', 'status', 'payment_status', 'total_amount', 
+        'shipping_fee', 'order_date', 'address',
+    ];
 
     protected $casts = [
         'order_date' => 'datetime',
@@ -67,7 +70,16 @@ class Order extends Model
     public function markAsComplete()
     {
         $this->update(['status' => 'complete']);
+        $this->decrementProductStock();
         return $this;
+    }
+
+    // Decrement product stock when order is completed
+    public function decrementProductStock()
+    {
+        foreach ($this->items as $item) {
+            $item->product->decrementStock($item->quantity);
+        }
     }
 
     // Mark order as failed
@@ -76,4 +88,28 @@ class Order extends Model
         $this->update(['status' => 'order fail']);
         return $this;
     }
+
+    // Increment product stock back when order fails (restore inventory)
+    public function restoreProductStock()
+    {
+        foreach ($this->items as $item) {
+            $item->product->increment('stock_number', $item->quantity);
+        }
+    }
+    // Mark order as paid
+    public function isPaid(): bool
+{
+    return $this->payments()->where('status', 'paid')->exists();
+}
+// Mark order as cancelled
+public function markAsCancelled()
+{
+    $this->update(['status' => 'cancelled']);
+    return $this;
+}
+//order status
+public function status()
+{
+    return $this->belongsTo(OrderStatus::class, 'order_status_id');
+}
 }
