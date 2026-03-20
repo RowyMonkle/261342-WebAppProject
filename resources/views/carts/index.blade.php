@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl leading-tight" style="color: var(--secondary);">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Cart') }}
         </h2>
     </x-slot>
@@ -21,10 +21,10 @@
                         {{-- ✅ หัวตาราง: เปลี่ยนจาก dark:bg-gray-700 → bg-gray-50 --}}
                         <thead class="bg-gray-50 border-b border-gray-200">
                             <tr>
-                                <th class="p-4 text-sm font-medium text-gray-500">สินค้า</th>
-                                <th class="p-4 text-sm font-medium text-gray-500">ราคา</th>
-                                <th class="p-4 text-sm font-medium text-gray-500">จำนวน</th>
-                                <th class="p-4 text-sm font-medium text-gray-500">รวม</th>
+                                <th class="p-4 text-sm font-medium text-gray-500">Product</th>
+                                <th class="p-4 text-sm font-medium text-gray-500">Price</th>
+                                <th class="p-4 text-sm font-medium text-gray-500">Quantity</th>
+                                <th class="p-4 text-sm font-medium text-gray-500">Subtotal</th>
                                 <th class="p-4"></th>
                             </tr>
                         </thead>
@@ -88,12 +88,20 @@
                         </span>
                     </div>
 
-                    {{-- ปุ่ม checkout --}}
-<div class="p-4 flex justify-end border-t">
-    <a href="{{ route('orders.confirm') }}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
-        Order Now
-    </a>
-</div>
+                    {{-- ✅ ปุ่ม Order Now --}}
+                    <div class="p-4 flex justify-end border-t border-gray-100">
+                        <form method="POST" action="{{ route('orders.store') }}">
+                            @csrf
+                            @foreach ($cart->items as $item)
+                                <input type="hidden" name="products[{{ $loop->index }}][product_id]" value="{{ $item->product_id }}">
+                                <input type="hidden" name="products[{{ $loop->index }}][quantity]" value="{{ $item->quantity }}">
+                            @endforeach
+                            <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 font-medium">
+                                Order Now
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
             @endif
 
