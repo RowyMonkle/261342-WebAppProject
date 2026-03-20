@@ -95,10 +95,18 @@
                     <x-slot name="trigger">
                         <button style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:10px; border:none; background:rgba(255,255,255,0.15); cursor:pointer; transition:all 0.2s;">
                             @auth
-                                {{-- Avatar circle --}}
-                                <div style="width:32px; height:32px; border-radius:50%; background:linear-gradient(135deg,#f9a8d4,#db2777); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:white;">
-                                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                                </div>
+                              
+                                <div style="width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0;">
+    @if(auth()->user()->image)
+        <img src="{{ route('user.photo', ['filename' => auth()->user()->image]) }}"
+             style="width:100%; height:100%; object-fit:cover;">
+    @else
+        {{-- fallback to first letter if no photo --}}
+        <div style="width:100%; height:100%; background:linear-gradient(135deg,#f9a8d4,#db2777); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:white;">
+            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+        </div>
+    @endif
+</div>
                                 <span style="font-size:14px; font-weight:500; color:white;">{{ auth()->user()->name }}</span>
                             @endauth
                             <svg width="14" height="14" fill="none" stroke="#db2777" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
