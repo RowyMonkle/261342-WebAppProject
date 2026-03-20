@@ -66,13 +66,13 @@
                 {{-- Cart Badge --}}
                 <a href="{{ route('carts.index') }}" style="position:relative; display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:10px; text-decoration:none; transition:all 0.2s;
                 {{ request()->routeIs('carts.*') ? 'background:rgba(255,255,255,0.25);' : '' }}">
-                    <svg width="20" height="20" fill="none" stroke="#db2777" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    <svg width="20" height="20" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                     @auth
                         @php
                             $cartCount = auth()->user()->cart?->items->sum('quantity') ?? 0;
                         @endphp
                         @if($cartCount > 0)
-                            <span style="position:absolute; top:4px; right:4px; background:#db2777; color:white; font-size:10px; font-weight:600; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
+                            <span style="position:absolute; top:4px; right:4px; background:white; color:#db2777; font-size:10px; font-weight:700; width:16px; height:16px; border-radius:50%; display:flex; align-items:center; justify-content:center;">
                                 {{ $cartCount > 9 ? '9+' : $cartCount }}
                             </span>
                         @endif
@@ -84,21 +84,21 @@
                     <x-slot name="trigger">
                         <button style="display:flex; align-items:center; gap:8px; padding:6px 10px; border-radius:10px; border:none; background:rgba(255,255,255,0.15); cursor:pointer; transition:all 0.2s;">
                             @auth
-                              
-                                <div style="width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0;">
-    @if(auth()->user()->image)
-        <img src="{{ route('user.photo', ['filename' => auth()->user()->image]) }}"
-             style="width:100%; height:100%; object-fit:cover;">
-    @else
-        {{-- fallback to first letter if no photo --}}
-        <div style="width:100%; height:100%; background:linear-gradient(135deg,#f9a8d4,#db2777); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:white;">
-            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-        </div>
-    @endif
-</div>
+                                {{-- ✅ แสดงรูป profile ถ้ามี ถ้าไม่มีแสดงตัวอักษรแรก --}}
+                                @if(auth()->user()->profile_photo)
+                                    <div style="width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0;">
+                                        <img src="{{ route('user.photo', ['filename' => auth()->user()->profile_photo]) }}"
+                                             style="width:100%; height:100%; object-fit:cover;"
+                                             alt="profile">
+                                    </div>
+                                @else
+                                    <div style="width:32px; height:32px; border-radius:50%; background:#f9a8d4; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:600; color:white;">
+                                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                    </div>
+                                @endif
                                 <span style="font-size:14px; font-weight:500; color:white;">{{ auth()->user()->name }}</span>
                             @endauth
-                            <svg width="14" height="14" fill="none" stroke="#db2777" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                            <svg width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                     </x-slot>
 
@@ -133,12 +133,21 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden" style="border-top: 1px solid rgba(255,182,193,0.3); padding: 12px 16px;">
         @auth
             <div style="display:flex; align-items:center; gap:10px; padding:10px 0; margin-bottom:8px; border-bottom: 1px solid rgba(255,182,193,0.2);">
-                <div style="width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#f9a8d4,#db2777); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:white;">
-                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                </div>
+                {{-- ✅ Mobile avatar ก็แสดงรูป profile เหมือนกัน --}}
+                @if(auth()->user()->profile_photo)
+                    <div style="width:36px; height:36px; border-radius:50%; overflow:hidden; flex-shrink:0;">
+                        <img src="{{ route('user.photo', ['filename' => auth()->user()->profile_photo]) }}"
+                             style="width:100%; height:100%; object-fit:cover;"
+                             alt="profile">
+                    </div>
+                @else
+                    <div style="width:36px; height:36px; border-radius:50%; background:#f9a8d4; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:white;">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                @endif
                 <div>
                     <p style="font-size:14px; font-weight:500; color:white; margin:0;">{{ auth()->user()->name }}</p>
-                    <p style="font-size:12px; color:#c084a0; margin:0;">{{ auth()->user()->email }}</p>
+                    <p style="font-size:12px; color:#fce7f3; margin:0;">{{ auth()->user()->email }}</p>
                 </div>
             </div>
         @endauth
