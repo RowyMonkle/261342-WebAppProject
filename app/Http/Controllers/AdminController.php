@@ -24,7 +24,7 @@ class AdminController extends Controller
     public function users()
     {
         $users = User::latest()->get();
-        
+
         $pendingRequests = \App\Models\SellerForm::with('user')->where('status', 'pending')->latest()->get();
 
         return view('admin.users', compact('users', 'pendingRequests'));
@@ -165,10 +165,16 @@ public function approveSeller($id)
         return DB::transaction(function () use ($id) {
             $request = SellerForm::findOrFail($id);
             
-            $request->update(['status' => 'approved']);
-            $request->user->update(['role' => 'admin']); // อนุมัติเป็นคนขาย
+            // 1. อัปเดตสถานะฟอร์มว่าผ่านการอนุมัติแล้ว
+            $request->status = 'approved';
+            $request->save();
 
-            return back()->with('success', "Approved seller request for {$request->user->name}!");
+            // 🌟 2. อัปเดต Role ของ User (แก้มาใช้แบบกำหนดค่าตรงๆ แล้วค่อย save)
+            $user = $request->user;
+            $user->role = 'admin';
+            $user->save(); 
+
+            return back()->with('success', "Approved seller request for {$user->name}!");
         });
     }
 
