@@ -93,9 +93,8 @@ Route::middleware('auth')->group(function () {
     // Seller Form (seller request that user can submit to admin for approval)
     Route::get('/profile/become-seller', [SellerFormController::class, 'create'])->name('seller.form.create');
     Route::post('/profile/become-seller', [SellerFormController::class, 'store'])->name('seller.form.store');
-
-    
-    
+    Route::patch('/seller-requests/{id}/approve', [\App\Http\Controllers\AdminController::class, 'approveSeller'])->name('admin.sellerRequests.approve');
+    Route::patch('/seller-requests/{id}/reject', [\App\Http\Controllers\AdminController::class, 'rejectSeller'])->name('admin.sellerRequests.reject');
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {

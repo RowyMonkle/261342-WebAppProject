@@ -1,6 +1,18 @@
 <x-app-layout>
     <div class="py-8" x-data="{ showSellerModal: false }">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+            {{-- 🌟 กล่องแจ้งเตือน Success / Error --}}
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-200 text-green-700 px-6 py-4 rounded-2xl mb-6 font-bold flex items-center gap-2">
+                    <span>✅</span> {{ session('success') }}
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-200 text-red-700 px-6 py-4 rounded-2xl mb-6 font-bold flex items-center gap-2">
+                    <span>⚠️</span> {{ session('error') }}
+                </div>
+            @endif
 
             {{-- ปุ่มกลับ --}}
             <div>
@@ -48,7 +60,7 @@
                         {{-- ถ้าไม่ใช่ Admin -> กดแล้วเปิด Modal ส่ง Request --}}
                         <button @click="showSellerModal = true" type="button" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 transition-colors">
                             <span class="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1"></span>
-                        </button>
+                        </button> 
                     @endif
                 </div>
             </div>
