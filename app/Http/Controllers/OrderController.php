@@ -173,9 +173,34 @@ public function storeNow(Request $request)
     return redirect()->route('orders.confirm', [ 'product_id' => $request->product_id,
         'quantity'   => $request->quantity,]);
 }
+// For "Buy Now" functionality, we can create a separate method that creates an order directly from a single product without going through the cart.
+public function storeNow(Request $request)
+{
+    $validated = $request->validate([
+        'product_id' => 'required|exists:products,product_id',
+        'quantity'   => 'required|integer|min:1',
+    ]);
+
+    
+    return redirect()->route('orders.confirm', [ 'product_id' => $request->product_id,
+        'quantity'   => $request->quantity,]);
+}
 //need confirm order page before store order, to show order summary and confirm before place order
 public function confirm(Request $request) 
+public function confirm(Request $request) 
 {
+    if ($request->has('product_id')) {
+        $product = Product::findOrFail($request->product_id);
+        $quantity = $request->quantity ?? 1;
+
+        return view('orders.confirm', [
+            'items'      => collect([['product' => $product, 'quantity' => $quantity, 'product_id' => $product->product_id]]),
+            'is_buy_now' => true,
+            'product_id' => $product->product_id,
+            'quantity'   => $quantity,
+        ]);
+    }
+
     if ($request->has('product_id')) {
         $product = Product::findOrFail($request->product_id);
         $quantity = $request->quantity ?? 1;
@@ -191,6 +216,7 @@ public function confirm(Request $request)
     $cart = Auth::user()->cart()->with('items.product')->first();
 
     if (!$cart || $cart->items->isEmpty()) {
+        return redirect()->route('carts.index')->with('error', 'Cart is empty.');
         return redirect()->route('carts.index')->with('error', 'Cart is empty.');
     }
 
@@ -249,6 +275,23 @@ public function confirm(Request $request)
 {
     $order = Auth::user()->orders()->findOrFail($id);
 
+     // update old  payment record instead of creating new one.
+    $payment = $order->payments()->where('status', 'unpaid')->first();
+    
+    if ($payment) {
+        $payment->update([
+            'status'       => 'paid',
+            'method'       => 'manual',
+            'payment_date' => now(),
+        ]);
+    } else {
+        $order->payments()->create([
+            'status'       => 'paid',
+            'method'       => 'manual',
+            'amount'       => $order->total_amount,
+            'payment_date' => now(),
+        ]);
+    }
      // update old  payment record instead of creating new one.
     $payment = $order->payments()->where('status', 'unpaid')->first();
     

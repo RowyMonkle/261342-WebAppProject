@@ -39,6 +39,19 @@
                         @endforeach
                     @endif
 
+                    {{-- hidden inputs --}}
+                    @if(isset($is_buy_now) && $is_buy_now)
+                        {{-- Buy Now --}}
+                        <input type="hidden" name="products[0][product_id]" value="{{ $product_id }}">
+                        <input type="hidden" name="products[0][quantity]" value="{{ $quantity }}">
+                    @else
+                        {{-- Cart --}}
+                        @foreach($cart->items as $item)
+                            <input type="hidden" name="products[{{ $loop->index }}][product_id]" value="{{ $item->product_id }}">
+                            <input type="hidden" name="products[{{ $loop->index }}][quantity]" value="{{ $item->quantity }}">
+                        @endforeach
+                    @endif
+
                     {{-- ข้อมูลผู้รับ --}}
                     <div class="space-y-4">
                         <h3 class="font-semibold text-lg">Recipient Information</h3>
@@ -58,6 +71,7 @@
                                 placeholder="กรอกที่อยู่จัดส่ง">{{ old('address', Auth::user()->address) }}</textarea>
                             @error('address') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
+
 
                         <div>
                             <label class="block text-sm text-gray-600 mb-1">Telephone Number</label>
@@ -95,6 +109,9 @@
                                 @php $product = $item['product'] ?? $item->product; @endphp
                                 @if(str_starts_with($product->image, 'http'))
                                     <img src="{{ $product->image }}" class="w-16 h-16 object-cover rounded-lg">
+                                @php $product = $item['product'] ?? $item->product; @endphp
+                                @if(str_starts_with($product->image, 'http'))
+                                    <img src="{{ $product->image }}" class="w-16 h-16 object-cover rounded-lg">
                                 @else
                                     <img src="{{ route('product.photo', ['filename' => basename($product->image)]) }}" 
      class="w-20 h-20 object-cover rounded-lg shadow-sm border border-gray-100">
@@ -102,13 +119,22 @@
                                 <div class="flex-1">
                                     <p class="font-medium">{{ $product->name }}</p>
                                     <p class="text-sm text-gray-500">฿{{ number_format($product->price, 2) }} x {{ $item['quantity'] ?? $item->quantity }}</p>
+                                    <p class="font-medium">{{ $product->name }}</p>
+                                    <p class="text-sm text-gray-500">฿{{ number_format($product->price, 2) }} x {{ $item['quantity'] ?? $item->quantity }}</p>
                                 </div>
+                                <p class="font-semibold">฿{{ number_format($product->price * ($item['quantity'] ?? $item->quantity), 2) }}</p>
                                 <p class="font-semibold">฿{{ number_format($product->price * ($item['quantity'] ?? $item->quantity), 2) }}</p>
                             </div>
                         @endforeach
                     </div>
 
                     {{-- สรุปราคา --}}
+                    @php
+                        $total = isset($is_buy_now) && $is_buy_now
+                            ? $items->sum(fn($i) => $i['product']->price * $i['quantity'])
+                            : $cart->items->sum(fn($i) => $i->product->price * $i->quantity);
+                    @endphp
+
                     @php
                         $total = isset($is_buy_now) && $is_buy_now
                             ? $items->sum(fn($i) => $i['product']->price * $i['quantity'])
