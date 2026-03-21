@@ -118,7 +118,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     // Seller Requests (Admin approval)
     Route::get('/seller-requests', [AdminController::class, 'sellerRequests'])->name('admin.sellerRequests');
-    Route::patch('/seller-requests/{id}/approve', [AdminController::class, 'approveSellerRequest'])->name('admin.sellerRequests.approve');
+    
 });
 
 require __DIR__.'/auth.php';
