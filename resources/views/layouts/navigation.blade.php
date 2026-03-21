@@ -4,7 +4,7 @@
 
             {{-- LOGO --}}
             <div class="flex items-center gap-8">
-                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 shrink-0">
+                <a href="{{ route('products.index') }}" class="flex items-center gap-2 shrink-0">
                     <div style="width:42px; height:42px; border-radius:50%; overflow:hidden; border: 2px solid rgba(255,255,255,0.6); flex-shrink:0;">
                         <img src="{{ asset('images/stellar.jpg') }}" alt="Stellar Logo" style="width:100%; height:100%; object-fit:cover;">
                     </div>
@@ -33,29 +33,7 @@
                         Products
                     </a>
 
-                    {{-- Orders --}}
-                    <a href="{{ route('orders.index') }}"
-                       style="display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:10px; font-size:14px; font-weight:500; text-decoration:none; transition: all 0.2s;
-                       {{ request()->routeIs('orders.*') ? 'background:rgba(255,255,255,0.25); color:white;' : 'color:white;' }}">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-                        Orders
-                    </a>
-
-                    {{-- Payments --}}
-                    <a href="{{ route('payments.index') }}"
-                       style="display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:10px; font-size:14px; font-weight:500; text-decoration:none; transition: all 0.2s;
-                       {{ request()->routeIs('payments.*') ? 'background:rgba(255,255,255,0.25); color:white;' : 'color:white;' }}">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-                        Payments
-                    </a>
-
-                    {{-- Wishlist --}}
-                    <a href="{{ route('wishlist.index') }}"
-                       style="display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:10px; font-size:14px; font-weight:500; text-decoration:none; transition: all 0.2s;
-                       {{ request()->routeIs('wishlist.*') ? 'background:rgba(255,255,255,0.25); color:white;' : 'color:white;' }}">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z"/></svg>
-                        Wishlist
-                    </a>
+                   
 
                 </div>
             </div>
@@ -78,6 +56,14 @@
                         @endif
                     @endauth
                 </a>
+                {{-- Wishlist --}}
+<a href="{{ route('wishlist.index') }}" style="display:flex; align-items:center; justify-content:center; width:40px; height:40px; border-radius:10px; text-decoration:none; transition:all 0.2s;
+{{ request()->routeIs('wishlist.*') ? 'background:rgba(255,255,255,0.25);' : '' }}">
+    <svg width="20" height="20" fill="#facc15" stroke="#facc15" stroke-width="1.5" viewBox="0 0 24 24"
+     style="filter: drop-shadow(0 0 3px #facc15);">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+</svg>
+</a>
 
                 {{-- Profile Dropdown --}}
                 <x-dropdown align="right" width="48">
@@ -101,7 +87,7 @@
                             <svg width="14" height="14" fill="none" stroke="#db2777" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                     </x-slot>
-
+                    
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.index')">
                             {{ __('Profile') }}
