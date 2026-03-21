@@ -10,6 +10,10 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RecentViewController;
+use App\Models\SellerRequest;
+use App\Http\Controllers\SellerRequestController;
+use App\Models\SellerForm;
+use App\Http\Controllers\SellerFormController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
@@ -86,13 +90,10 @@ Route::middleware('auth')->group(function () {
     // Recent Views
     Route::get('/recent-views', [RecentViewController::class, 'index'])->name('recentViews.index');
 
-    // Request Seller
-    Route::post('/profile/request-seller', function () {
-        // อนาคตคุณสามารถเขียน Controller มารับค่าตรงนี้ได้ (เช่น บันทึกลงตาราง seller_requests)
-        // สำหรับตอนนี้ ให้ redirect กลับมาพร้อมข้อความแจ้งเตือนสำเร็จ
-        return back()->with('success', 'request has been sent! please wait for admin to approve your request');
-    })->name('profile.requestSeller');
-    });
+    // Seller Form (seller request that user can submit to admin for approval)
+    Route::get('/profile/become-seller', [SellerFormController::class, 'create'])->name('seller.form.create');
+    Route::post('/profile/become-seller', [SellerFormController::class, 'store'])->name('seller.form.store');
+});
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
@@ -112,6 +113,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::patch('/orders/{id}/complete', [AdminController::class, 'markAsComplete'])->name('admin.orders.complete');
     Route::patch('/orders/{id}/processing', [AdminController::class, 'markAsProcessing'])->name('admin.orders.processing');
     Route::patch('/orders/{id}/status', [AdminController::class, 'updateStatus'])->name('admin.orders.updateStatus');
+
+    // Seller Requests (Admin approval)
+    Route::get('/seller-requests', [AdminController::class, 'sellerRequests'])->name('admin.sellerRequests');
+    Route::patch('/seller-requests/{id}/approve', [AdminController::class, 'approveSellerRequest'])->name('admin.sellerRequests.approve');
 });
 
 require __DIR__.'/auth.php';

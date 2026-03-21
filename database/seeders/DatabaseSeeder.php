@@ -20,28 +20,23 @@ class DatabaseSeeder extends Seeder
 
         User::updateOrCreate(
             ['email' => 'test@example.com'],
-            ['name' => 'Test User', 'password' => bcrypt('password')],
-            [ 'role' => 'admin']
+            ['name' => 'Test User', 'password' => bcrypt('password'), 'role' => 'admin']
         );
         User::updateOrCreate(
             ['email' => 'nannapat_chaip@cmu.ac.th'],
-            ['name' => 'fame', 'password' => bcrypt('fame1846')],
-            [ 'role' => 'admin']
+            ['name' => 'fame', 'password' => bcrypt('fame1846'), 'role' => 'admin'],
         );
         User::updateOrCreate(
             ['email' => 'pandarayuti@gmail.com'],
-            ['name' => 'panda', 'password' => bcrypt('Pandarayuti0707')],
-            [ 'role' => 'admin']
+            ['name' => 'panda', 'password' => bcrypt('Pandarayuti0707'), 'role' => 'admin'],
         );
          User::updateOrCreate(
             ['email' => 'forcolingzie@gmail.com'],
-            ['name' => 'forcollapsse', 'password' => bcrypt('670615022')],
-            [ 'role' => 'admin']
+            ['name' => 'forcollapsse', 'password' => bcrypt('670615022'), 'role' => 'admin' ]
         );
   User::updateOrCreate(
     [ 'email' => 'fai123@gmail.com' ],
-    [ 'name'     => 'Fai', 'password' => bcrypt('12345678')],
-    [ 'role'     => 'admin' ]
+    [ 'name'     => 'Fai', 'password' => bcrypt('12345678'), 'role' => 'admin' ]
 );
   
         $this->call([

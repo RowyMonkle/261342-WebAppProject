@@ -104,7 +104,7 @@
 
         </div>
 
-        {{-- 🌟 Modal: ส่งคำขอเป็นผู้ขาย (สำหรับ Customer) --}}
+        {{-- 🌟 sent request modal (สำหรับ Customer) --}}
         <div x-show="showSellerModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 
@@ -128,21 +128,25 @@
                         </h3>
                         <div class="mt-2">
                             <p class="text-sm text-gray-500">
-                                คุณต้องการส่งคำขอไปยัง Admin เพื่อเปิดสิทธิ์การขายสินค้าในระบบใช่หรือไม่? เมื่อ Admin อนุมัติแล้ว คุณจะสามารถจัดการร้านค้าของตัวเองได้
+                                คุณต้องการส่งคำขอไปยัง Admin เพื่อเปิดสิทธิ์การขายสินค้าในระบบใช่หรือไม่?
                             </p>
                         </div>
                     </div>
                     
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-                        <form action="{{ route('profile.requestSeller') }}" method="POST" class="w-full sm:w-auto">
-                            @csrf
-                            <button type="submit" class="w-full inline-flex justify-center rounded-full border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white sm:text-sm" style="background: var(--primary);">
-                                ส่งคำขอ
-                            </button>
-                        </form>
-                        <button type="button" @click="showSellerModal = false" class="mt-3 w-full inline-flex justify-center rounded-full border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:text-sm">
+                    <div class="bg-gray-50 px-4 py-4 sm:px-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                        
+                        {{-- ปุ่มยกเลิก --}}
+                        <button type="button" @click="showSellerModal = false" 
+                                class="w-full sm:w-1/2 inline-flex justify-center items-center rounded-full border border-gray-300 shadow-sm px-6 py-2.5 bg-white text-base font-bold text-gray-700 hover:bg-gray-50 transition sm:text-sm">
                             ยกเลิก
                         </button>
+
+                        <a href="{{ route('seller.form.create') }}" 
+                           class="w-full sm:w-1/2 inline-flex justify-center items-center rounded-full border border-transparent shadow-sm px-6 py-2.5 text-base font-bold text-white hover:opacity-90 transition sm:text-sm m-0" 
+                           style="background: var(--primary);">
+                            กรอกข้อมูลเปิดร้าน
+                        </a>
+                        
                     </div>
                 </div>
             </div>
