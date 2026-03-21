@@ -52,16 +52,21 @@
                     </span>
 
                     @if(auth()->user()->role === 'admin')
-                        {{-- ถ้าเป็น Admin -> กดแล้วสลับไปหน้า Dashboard ของ Admin เลย --}}
-                        <a href="{{ route('admin.index') }}" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors" style="background: var(--secondary);">
-                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
-                        </a>
-                    @else
-                        {{-- ถ้าไม่ใช่ Admin -> กดแล้วเปิด Modal ส่ง Request --}}
-                        <button @click="showSellerModal = true" type="button" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 transition-colors">
-                            <span class="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1"></span>
-                        </button> 
-                    @endif
+    {{-- Admin --}}
+    <a href="{{ route('admin.index') }}" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors" style="background: var(--secondary);">
+        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
+    </a>
+@elseif(auth()->user()->role === 'seller')
+    {{-- Seller อยู่แล้ว --}}
+    <a href="{{ route('seller.index') }}" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors" style="background: var(--secondary);">
+        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-6"></span>
+    </a>
+@else
+    {{-- Customer ปกติ --}}
+    <button @click="showSellerModal = true" type="button" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 transition-colors">
+        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition translate-x-1"></span>
+    </button>
+@endif
                 </div>
             </div>
 
