@@ -103,7 +103,7 @@
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
+                        <x-dropdown-link :href="route('profile.index')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
                         <form method="POST" action="{{ route('logout') }}">
@@ -149,7 +149,8 @@
         <x-responsive-nav-link :href="route('payments.index')" :active="request()->routeIs('payments.*')">💳 Payments</x-responsive-nav-link>
         <x-responsive-nav-link :href="route('carts.index')" :active="request()->routeIs('carts.*')">🛒 Cart</x-responsive-nav-link>
         <x-responsive-nav-link :href="route('wishlist.index')" :active="request()->routeIs('wishlist.*')">🤍 Wishlist</x-responsive-nav-link>
-        <x-responsive-nav-link :href="route('profile.edit')">👤 Profile</x-responsive-nav-link>
+        <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')">👤 Profile</x-responsive-nav-link>
+        <x-responsive-nav-link :href="route('profile.index')" :active="request()->routeIs('profile.index')">👤 Profile</x-responsive-nav-link>
 
         <form method="POST" action="{{ route('logout') }}">
             @csrf

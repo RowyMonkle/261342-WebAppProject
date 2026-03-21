@@ -187,7 +187,6 @@ public function storeNow(Request $request)
 }
 //need confirm order page before store order, to show order summary and confirm before place order
 public function confirm(Request $request) 
-public function confirm(Request $request) 
 {
     if ($request->has('product_id')) {
         $product = Product::findOrFail($request->product_id);

@@ -7,6 +7,8 @@ use App\Models\Product;
 use App\Models\Tag;
 use Illuminate\Support\Facades\Storage; // import storage facade for handling file uploads
 use App\Models\Wishlist;
+use App\Models\RecentView;
+
 use Illuminate\Support\Facades\Auth; 
 use Cloudinary\Cloudinary as CloudinaryClient;
 use Cloudinary\Configuration\Configuration;
@@ -108,6 +110,13 @@ class ProductController extends Controller
        $product = Product::with('tags')
                 ->where('product_id', $id)
                 ->firstOrFail();
+        
+                if (Auth::check()) {
+                RecentView::create([
+                'user_id' => Auth::id(),
+                'product_id' => $product->product_id, 
+            ]);
+        }
         //check if the product is in the user's wishlist
         $inWishlist = Auth::check()? $product->wishlists()->where('user_id', Auth::id())->exists() : false;
     return view('products.show', compact('product', 'inWishlist'));

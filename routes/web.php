@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\RecentViewController;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Response;
 
@@ -41,7 +42,12 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // add profile index.blade
+    Route::get('/profile', function () {
+        return view('profile.index');
+    })->name('profile.index');
+
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::patch('/profile/photo/update', [UserController::class, 'updateProfilePhoto'])->name('profile.photo.update');
@@ -76,7 +82,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/wishlists', [WishlistController::class, 'store'])->name('wishlist.store');
     Route::post('/wishlists/toggle', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::delete('/wishlists/{wishlist}', [WishlistController::class, 'destroy'])->name('wishlist.destroy');
-});
+
+    // Recent Views
+    Route::get('/recent-views', [RecentViewController::class, 'index'])->name('recentViews.index');
+
+    // Request Seller
+    Route::post('/profile/request-seller', function () {
+        // อนาคตคุณสามารถเขียน Controller มารับค่าตรงนี้ได้ (เช่น บันทึกลงตาราง seller_requests)
+        // สำหรับตอนนี้ ให้ redirect กลับมาพร้อมข้อความแจ้งเตือนสำเร็จ
+        return back()->with('success', 'request has been sent! please wait for admin to approve your request');
+    })->name('profile.requestSeller');
+    });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.index');
