@@ -24,10 +24,10 @@ class AdminController extends Controller
     public function users()
     {
         $users = User::latest()->get();
-        return view('admin.users', compact('users'));
-
+        
         $pendingRequests = \App\Models\SellerForm::with('user')->where('status', 'pending')->latest()->get();
-        return view('admin.index', compact('pendingRequests'));
+
+        return view('admin.users', compact('users', 'pendingRequests'));
     }
 
     public function orders()

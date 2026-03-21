@@ -52,6 +52,4 @@ class SellerFormController extends Controller
 
         return view('profile.seller-form'); // form for requesting seller access 
     }
-
-    
 }
