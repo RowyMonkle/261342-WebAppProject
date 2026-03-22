@@ -38,16 +38,33 @@ class AdminController extends Controller
     }
     public function markAsPacking(string $id)
 {
-    Order::findOrFail($id)->markAsPacking();
+    $order = Order::with('items.product.sellers')->findOrFail($id);
+    
+    // เช็คว่ามีสินค้าของ seller ไหม
+    $hasSeller = $order->items->some(fn($item) => $item->product->sellers->isNotEmpty());
+    
+    if ($hasSeller) {
+        return back()->with('error', 'This order contains seller products. Seller must handle packing.');
+    }
+    
+    $order->markAsPacking();
     return redirect()->back()->with('success', 'Order marked as packing.');
 }
 
 public function markAsDelivering(string $id)
 {
-    Order::findOrFail($id)->markAsDelivering();
+    $order = Order::with('items.product.sellers')->findOrFail($id);
+    
+    // เช็คว่ามีสินค้าของ seller ไหม
+    $hasSeller = $order->items->some(fn($item) => $item->product->sellers->isNotEmpty());
+    
+    if ($hasSeller) {
+        return back()->with('error', 'This order contains seller products. Seller must handle delivery.');
+    }
+    
+    $order->markAsDelivering();
     return redirect()->back()->with('success', 'Order marked as delivering.');
 }
-
 public function markAsComplete(string $id)
 {
     Order::findOrFail($id)->markAsComplete();
@@ -76,7 +93,8 @@ public function products()
 
 public function updateStatus(Request $request, $id)
 {
-    $order = Order::with('items.product')->findOrFail($id);
+    //seller manage theire own product
+    $order = Order::with('items.product.sellers')->findOrFail($id);
     $newStatus = strtolower($request->status);
     $currentStatus = strtolower($order->status);
     //check payment bf confirm
@@ -101,6 +119,11 @@ public function updateStatus(Request $request, $id)
     // if not Cancel and try to back
     if ($newStatus !== 'cancelled' && $newRank <= $currentRank) {
         return back()->with('error', 'Cannot move status backwards.');
+    }
+    $hasSeller = $order->items->some(fn($item) => $item->product->sellers->isNotEmpty());
+    //check that product if from seller or not
+    if ($hasSeller && in_array($newStatus, ['packing', 'delivering'])) {
+    return back()->with('error', 'This order contains seller products. Seller must handle packing and delivery.');
     }
     // 3. use Transaction for security of data
     return \DB::transaction(function () use ($order, $newStatus) {

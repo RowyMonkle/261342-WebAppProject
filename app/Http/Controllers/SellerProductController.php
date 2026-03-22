@@ -6,15 +6,22 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Cloudinary\Cloudinary as CloudinaryClient;
-
+use App\Models\Order;
 class SellerProductController extends Controller
 {
     // แสดงเฉพาะสินค้าของ seller คนนั้น
     public function index()
-    {
-        $products = Auth::user()->sellerProducts;
-        return view('seller.index', compact('products'));
-    }
+{
+    $products = Auth::user()->sellerProducts;
+    //if people order their products
+    $orders = Order::whereHas('items.product', function ($q) {
+        $q->whereHas('sellers', function ($s) {
+            $s->where('users.id', Auth::id());
+        });
+    })->with('items.product', 'user')->latest('order_date')->get();
+
+    return view('seller.index', compact('products', 'orders'));
+}
 
     public function create()
     {
@@ -84,4 +91,48 @@ class SellerProductController extends Controller
 
         return redirect()->route('seller.index')->with('success', 'Product deleted successfully.');
     }
+
+    //add method order that seller can control their own product for shipping and packing
+    public function orders()
+{
+    $orders = Order::whereHas('items.product', function ($q) {
+        $q->whereHas('sellers', function ($s) {
+            $s->where('users.id', Auth::id());
+        });
+    })->with('items.product', 'user')->latest('order_date')->get();
+
+    return view('seller.index', compact('orders'));
+}
+
+public function markAsPacking(string $id)
+{
+    $order = Order::whereHas('items.product', function ($q) {
+        $q->whereHas('sellers', function ($s) {
+            $s->where('users.id', Auth::id());
+        });
+    })->findOrFail($id);
+
+    if ($order->status !== 'processing') {
+        return back()->with('error', 'Order must be in processing status.');
+    }
+
+    $order->update(['status' => 'packing']);
+    return back()->with('success', 'Order marked as packing.');
+}
+
+public function markAsDelivering(string $id)
+{
+    $order = Order::whereHas('items.product', function ($q) {
+        $q->whereHas('sellers', function ($s) {
+            $s->where('users.id', Auth::id());
+        });
+    })->findOrFail($id);
+
+    if ($order->status !== 'packing') {
+        return back()->with('error', 'Order must be in packing status.');
+    }
+
+    $order->update(['status' => 'delivering']);
+    return back()->with('success', 'Order marked as delivering.');
+}
 }

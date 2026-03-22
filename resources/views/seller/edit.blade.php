@@ -9,9 +9,9 @@
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white rounded-2xl shadow-sm p-6">
 
-                <form method="POST" action="{{ route('seller.update', $product->product_id) }}" enctype="multipart/form-data">
-                    @csrf
-                    @method('PATCH')
+                <form method="POST" action="{{ route('seller.products.update', $product->product_id) }}" enctype="multipart/form-data">
+    @csrf
+    @method('PATCH')
 
                     {{-- Name --}}
                     <div class="mb-4">

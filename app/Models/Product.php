@@ -78,4 +78,8 @@ class Product extends Model
     {
         return $this->hasMany(Wishlist::class, 'product_id', 'product_id');
 }
+public function sellers()
+{
+    return $this->belongsToMany(User::class, 'seller_products', 'product_id', 'seller_id');
+}
 }

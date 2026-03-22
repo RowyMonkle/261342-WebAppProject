@@ -130,5 +130,10 @@ Route::middleware(['auth', 'seller'])->prefix('seller')->name('seller.')->group(
     Route::get('/products/{id}/edit', [SellerProductController::class, 'edit'])->name('products.edit');
     Route::patch('/products/{id}', [SellerProductController::class, 'update'])->name('products.update');
     Route::delete('/products/{id}', [SellerProductController::class, 'destroy'])->name('products.destroy');
+
+    // Orders
+    Route::get('/orders', [SellerProductController::class, 'orders'])->name('orders.index');
+    Route::patch('/orders/{id}/packing', [SellerProductController::class, 'markAsPacking'])->name('orders.packing');
+    Route::patch('/orders/{id}/delivering', [SellerProductController::class, 'markAsDelivering'])->name('orders.delivering');
 });
 require __DIR__.'/auth.php';
