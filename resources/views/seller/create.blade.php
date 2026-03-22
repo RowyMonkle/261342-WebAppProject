@@ -9,7 +9,7 @@
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="overflow-hidden shadow-sm sm:rounded-[var(--radius-2xl)] p-8 border border-pink-50" style="background-color: var(--surface);">
                 
-                <form method="POST" action="{{ route('seller.products.update', $product->product_id) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('seller.products.store') }}" enctype="multipart/form-data">
                     @csrf
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -122,7 +122,7 @@
 
                     {{-- Button --}}
                     <div class="flex justify-between items-center">
-                        <a href="{{ route('admin.products') }}" class="text-sm text-gray-500 hover:text-pink-500 flex items-center transition-colors">
+                        <a href="{{ route('seller.index') }}" class="text-sm text-gray-500 hover:text-pink-500 flex items-center transition-colors">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
                             Cancel
                         </a>
